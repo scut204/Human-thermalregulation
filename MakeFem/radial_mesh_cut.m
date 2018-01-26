@@ -1,10 +1,14 @@
 function [v_phi,v1c]=radial_mesh_cut(v,lines,label,n,con)
+
+% 径向切割，从圆心点向外切割
+% v lines 是点线信息 
+% label 是标签数据
 lines1=lines(label(lines(:,1))==con,:);    %
 v1=v(label==con,:);   %y=0.3
 v1c=mean(v1);
 
 num_phi=n;
-phi=2*pi/num_phi:2*pi/num_phi:2*pi;
+phi=2*pi/num_phi   :    2*pi/num_phi    :    2*pi;
 v_phi=[];
 for i=1:length(phi)
     cp=cos(phi(i));

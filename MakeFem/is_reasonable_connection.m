@@ -1,5 +1,5 @@
 function [is_closed,area]=is_reasonable_connection(vl,lines,label,li)
-
+    % 这个是用来判断横向切割的环是否合理
     %
     ll=lines(label(lines(:,1))==li,:); 
     v=vl(label==li,:);

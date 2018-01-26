@@ -6,33 +6,32 @@
 %%%%%%%%%%%%
 clearvars;
 if ~exist('human_nodfh_vf.mat')
-[v,f]=zread_mesh('human_nodfh.obj');
+    [v,f]=zread_mesh('human_nodfh.obj');
 
-save('human_nodfh_vf.mat','v','f');
+    save('human_nodfh_vf.mat','v','f');
 else 
     load('human_nodfh_vf.mat');
 end
 % zplot_mesh(v,f); hold on;
 
 % get the mesh cut point set, extract the lines and vertex.
-
 % status=0;
-% ymax=max(v(:,2));
-% ymin=min(v(:,2));
-% sfh=1;
-% ys=ymin:sfh:ymax;
-% for flr=1:length(ys)
-%     points=[];
-%     for i=1:length(f)
-%          points=y_plane_cut_test(v',f{i}',points,0.6);
-%          points=y_plane_cut_test(v',f{i}',points,0.3);
-%     end
-% end
-
+ymax=max(v(:,2));
+ymin=min(v(:,2));
+sfh=1;
+ys=ymin:sfh:ymax;
+for flr=1:length(ys)
+    points=[];
     for i=1:length(f)
          points=y_plane_cut_test(v',f{i}',points,0.6);
          points=y_plane_cut_test(v',f{i}',points,0.3);
     end
+end
+
+for i=1:length(f)
+     points=y_plane_cut_test(v',f{i}',points,0.6);
+     points=y_plane_cut_test(v',f{i}',points,0.3);
+end
 clear y_plane_cut_test;
 [v,lines]=extract_vertex_n_lines(points);    %  modified from official function, so it's quick.
 % plot_testvl(v,lines,'r');
@@ -42,15 +41,16 @@ C=make_component_graph(lines);
 [label,~]=graph_connected_components(C);
 plot_divided_vl(v,lines,label);
 
-% match the point between the adjacent floors.
-n=30;
-[v2_phi,v2c]=radial_mesh_cut(v,lines,label,n,3);
-[v5_phi,v5c]=radial_mesh_cut(v,lines,label,n,4);
 
-body2=make_body_section(v2_phi,v2c);
-body5=make_body_section(v5_phi,v5c);
-draw_internal_section(body2);
-draw_internal_section(body5);
+% match the point between the adjacent floors.
+% n=30;
+% [v2_phi,v2c]=radial_mesh_cut(v,lines,label,n,3);
+% [v5_phi,v5c]=radial_mesh_cut(v,lines,label,n,4);
+% 
+% body2=make_body_section(v2_phi,v2c);
+% body5=make_body_section(v5_phi,v5c);
+% draw_internal_section(body2);
+% draw_internal_section(body5);
 
 % for i=1:n
 %     XX=[v2_phi(i,1) v5_phi(i,1)];

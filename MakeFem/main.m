@@ -1,4 +1,6 @@
 %%%%%%%%%%%%%
+% this plot is to make a partition to a human model, generate various
+% bodyparts and save them into a structure.
 % v vertex matrix m*3
 % f cell array depicting the faces matrix of fn
 % points  the intersection of meshcut algorithm
@@ -50,7 +52,7 @@ for flr=cur:length(ys)
     [label,~]=graph_connected_components(C);
     
     % valid the connections
-    % record the number of connections
+    % record the number of connections 用来判断左右两边的
     valid_label=[];
     for li=1:max(label)
         [is_closed,area]=is_reasonable_connection(vl,lines,label,li);  % area variable is saved for future serious judge.
@@ -89,7 +91,7 @@ for flr=cur:length(ys)
                 for con=1:2
                    [v_phi_array(:,:,con),v_center_array(con,:)]=radial_mesh_cut(vl,lines,label,num_ringp,valid_label(con));
                 end
-                le=size(leftleg.v_phi,3);
+                le=size(leftleg.v_phi,3);    % le表示层数
                 [leftleg.v_phi(:,:,le+1),leftleg.prevc]=center_neareast_pointset(v_phi_array,v_center_array,leftleg.prevc);
                 [rightleg.v_phi(:,:,le+1),rightleg.prevc]=center_neareast_pointset(v_phi_array,v_center_array,rightleg.prevc);
             end

@@ -1,13 +1,17 @@
 % - Compute and assemble nodal boundary flux vector and point sources 
-function f = src_and_flux_tetra(f); 
-include_flags; 
-  
-% assemble point sources to the global flux vector  
-f(ID)   = f(ID) + P(ID); 
-  
+function f = src_and_flux_tetra(f,Trp); 
+makebias_srcflx;
+
+
+% Tm m_rsw n_bc + 3d elem
+h_fg = 2500.8 - 2.36 * Tm + 0.0016*Tm^2-0.00006*Tm^3;
+m_val = Sweat_vapor.compute_valid_vapor(Trp,h_fg)	;
+
+n_bc(5:8,:)=m_val;  
+nbe = size(n_bc,2);
 % compute nodal boundary flux vector 
 for i = 1:nbe 
-        
+                                                                                    
         fq        = [0 0 0 0]';                % initialize the nodal source vector  
         node1     = n_bc(1,i);          % first node 
         node2     = n_bc(2,i);          % second node
@@ -39,10 +43,10 @@ for i = 1:nbe
         fq  = -fq;          % define nodal flux vectors as negative  
          
         % assemble the nodal flux vector 
-        f(ID(node1)) = f(ID(node1)) + fq(1);   
-        f(ID(node2)) = f(ID(node2)) + fq(2);
-		f(ID(node3)) = f(ID(node3)) + fq(3);
-        f(ID(node4)) = f(ID(node4)) + fq(4);
+        f((node1)) = f((node1)) + fq(1);   
+        f((node2)) = f((node2)) + fq(2);
+		f((node3)) = f((node3)) + fq(3);
+        f((node4)) = f((node4)) + fq(4);
                 
 end   
 
@@ -54,14 +58,14 @@ function fq=gen_fq(src_P,n_bce)
 %             gp = 1/3;
             fq=[0 0 0]';
             [w,gp] = gauss_tri(2);
-            iso_para =[eye(2);zeros(1,2)];
-            gp_nodes=gp*iso_para;
+
+            gp_nodes=gp;
        for i=1:length(w)         
             psi   = gp_nodes(i,1);
             eta   = gp_nodes(i,2);
             N  =  [1-psi-eta  eta  psi];        % 2D shape functions in the parent domain
             [~,J] = BmatHeat2D_triangular(eta,psi,src_P(:,1:2));
-            J = J *0.5;
+
             flux   = N * n_bce;               % interpolate flux using shape functions in 16.1 it's 20
             fq     =fq + w(i) *N' *flux*J;      % nodal flux   
             %                 1        20  length/2(GQ)

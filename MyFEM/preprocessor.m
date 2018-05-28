@@ -1,10 +1,15 @@
-function  [K,f,d] = preprocessor; 
-include_flags; 
+function  [K,f,d,Tb,Ta,Trp] = preprocessor; 
+ 
   
 % read input file  
-%input_file_1ele; 
+
 input_file_16ele; 
-%input_file_64ele; 
+include_flags;
 
 % generate ID and LM arrays  
-d = setup_ID_LM(d); 
+% d = setup_ID_LM(d);
+
+% set the z_pi of blood vessels 1D
+fprintf('The temperature of current initial circumstance: %d \n',Tm);
+
+end

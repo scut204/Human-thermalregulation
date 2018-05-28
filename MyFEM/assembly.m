@@ -1,5 +1,5 @@
 % assemble element stiffness matrix and nodal force vector  
-function [K,f,Cap] = assembly(K,f,e,ke,fe,Cape) 
+function [K,Cap] = assembly(K,e,ke,Cape) 
 include_flags; 
   
 % for loop1 = 1:nen 
@@ -12,8 +12,9 @@ include_flags;
 %     end 
 % end 
 
-L =     1:nen;
-g =     LM(L,e);
-f(g) =      f(g)+fe(L);
-K(g,g) =    K(g,g)+ke(L,L);
-Cap(g,g)=   Cap(g,g)+Cape(L,L);
+L =     1:nen;        % 一个元素的顶点数量数组
+g =     LM(L,e);      % 获得该元素的顶点序号
+% f(g) =      f(g)+fe;
+K(g,g) =    K(g,g)+ke;
+Cap(g,g)=   Cap(g,g)+Cape;
+

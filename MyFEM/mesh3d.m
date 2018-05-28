@@ -1,6 +1,19 @@
-function mesh3d; 
-include_flags; 
 % 这里只需要把元素与点序号对应起来
+
+
+
+%%%%%%%%%%%%%%%%% only for test
+% femtet.v=[];
+% bott=2;
+% r = 10:((bott-10)/16):bott;
+% drl = 10 * ones(16,1);
+% rad = 2*pi/30*(1:30);
+% for fl=1:16
+%     for i=1:4
+%         femtet.v = [femtet.v;[drl(fl)/i*cos(rad)' fl*ones(30,1) drl(fl)/i*sin(rad)']];
+%     end
+% end
+
 
 x=femtet.v(:,1);
 y=femtet.v(:,2);
@@ -10,6 +23,8 @@ z=femtet.v(:,3);
 
 IEN=[femtet.f([femtet.e1(:,1) femtet.e2(:,1) femtet.e3(:,1)],:)';
 	 femtet.f([femtet.e1(:,2) femtet.e2(:,2) femtet.e3(:,2)],:)' ];
+IEN3 = [femtet.f3(femtet.e4(:,1),:)';
+        femtet.f3(femtet.e4(:,2),:)'];
 
 % plot mesh and natural boundary  
 % plotmesh; 

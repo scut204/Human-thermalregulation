@@ -23,9 +23,9 @@ debug=0;
 status=0;
 ymax=max(v(:,2));
 ymin=min(v(:,2));
-sfh=0.8;
+sfh=0.8;    % 每一层的高度
 ys=ymin:sfh:ymax;
-num_ringp=30;
+num_ringp=30;   % 每一层的点数
 cur=1;
 
 if(debug)

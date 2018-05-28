@@ -1,42 +1,86 @@
 %%%%%%%%%%%%%%%%%%%%% 
-% Heat conduction in 2D (Chapter 8)      % 
-% Haim Waisman, Rensselaer               % 
+% Heat conduction in 3D    % 
+% zty           % 
 %%%%%%%%%%%%%%%%%%%% % 
 clear all; 
 close all;  
 
-
 % Include global variables 
-include_flags; 
+% include_flags;
+% [Se,De,Ti_env,Tb_env]=set_env; % wrap the environment parameters
 
 % Preprocessing  
-[K,f,d] = preprocessor; 
-
+[K,f,d,Tb,Ta,Trp] ...     % Trp parameters
+     = preprocessor;   % initial K矩阵，负载向量，组织温度d，血液温度Tb
 % Evaluate element conductance matrix, nodal source vector and assemble 
-    
-for e = 1:nel 
-    [ke, fe, Cape] = heat3Delem(e);  
-    [K,f, Cap] = assembly(K,f,e,ke,fe,Cape);   
-end 
+save('forvalid.mat','Trp');
+[sK,Cap] = heat3Delem(zeros(Trp.nnp,Trp.nnp),Trp);      % 仅仅对组织的K刚性矩阵和热容矩阵进行计算
+dK = zeros(size(K));
+df = zeros(size(f));
 
-%  Compute and assemble nodal boundary flux vector and point sources  
-% f= src_and_flux_tetra(f);
-[K,f] = src_mix_boundaryC(K,f);
-% f = src_and_flux_t(f); % 
-% f = src_and_flux_prism(f);
+ % compute the blood pressure
+[Trp.prsa,Trp.prsb]  = blood_and_respiratory_1D(Trp);
+
+
+
+%  Compute and assemble nodal boundary flux vector and point sources                
+[dK,df] = src_mix_boundaryC(dK,df,Trp,'blood',Tb,Ta);   % 血液温度
+[dK,df] = src_mix_boundaryC(dK,df,Trp);           % 皮肤对流辐射
+ df =     src_and_flux_tetra(df,Trp);                 % 皮肤蒸发散热
+ df =     src_metabolism(df,Ta,Tb,Trp);
+
+ % 整合所有条件
+K = sK + dK;
+f = df;
 
 % Solution  
-[d,f_E] = solvedr(K,f,d);
+[d] = solvedr(K,f,d);
+[Tb,Ta]      = solve_Tblood(d,Tb,Ta,Trp) ; 
+% postprocessor(d);
+nm_ture.nd = []; nm_ture.nT = [];
+nm_ture.Tcor = []; nm_ture.Tsk=[];
+nm_ture.Tfat = []; nm_ture.Tmus=[];
+% if(exist('load_t.mat'))
+%     load('load_t.mat');
+% end
+for t=1:5000
     
-    
-for t=1:1
     
     % Postprocessing 
-    postprocessor(d); 
-    
-%     Kt=Cap+0.5*dtime*K;
-%     ft=(Cap-0.5*dtime*K)*d;
-%     [d,f_E] = solvedr(Kt,ft,d);
-    
+      
+% %       获得皮肤表面温度和内核温度
+      [T_core,T_skin,T_fat,T_mus] = compute_T_core_and_skin(d,Trp);
+      Trp=control_system(T_core,T_skin,Trp);
+      
+      [Trp.prsa,Trp.prsb]  = blood_and_respiratory_1D(Trp);
+
+      [dK,df] = src_mix_boundaryC(dK,df,Trp,'blood',Tb,Ta);   % 血液温度
+      [dK,df] = src_mix_boundaryC(dK,df,Trp);           % 皮肤对流辐射
+      df      = src_and_flux_tetra(df,Trp);                 % 皮肤蒸发散热
+      df      = src_metabolism(df,Ta,Tb,Trp);            
+      dK=.5*dK;df=.5*df;      % 对 dK与 dF 做更新
+
+      K = sK + dK;      % 相当于 (K+K_) /2 
+      f = df ;
+      
+
+%       [d,f_E] = solvedr(K,f,d);
+      theta = 0.5;
+      [d] = solvedr(Cap+theta*Trp.dtime*(K),(Cap-(1-theta)*Trp.dtime*K)*d + Trp.dtime*f,d);  % 
+      [Tb,Ta]      = solve_Tblood(d,Tb,Ta,Trp) ; 
+   
+      nm_ture=show_diff_tissue_blood(Tb,d,T_core,T_skin,T_fat,T_mus,nm_ture);
 end
-    
+figure,1;
+plot(nm_ture.nT);hold on;
+plot(nm_ture.nd);
+
+figure,2;
+plot(nm_ture.Tcor);hold on;
+plot(nm_ture.Tsk);
+plot(nm_ture.Tmus);
+plot(nm_ture.Tfat);
+save('load_t.mat');
+saveas(gcf,'save.jpg');
+%  postprocessor(d);
+      

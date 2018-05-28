@@ -4,8 +4,8 @@ include_flags
   
 % plot the temperature field 
 if strcmpi(plot_temp,'yes') == 1;   
-   d1   = d(ID); 
-   figure(2);  view(3);hold on; 
+   d1   = d; 
+   figure(1);  view(3);hold on; 
    axis([min(x) max(x) min(y) max(y) min(z) max(z) min(d1) max(d1)]);    
    for e = 1:nel 
 	   XX  = [x(IEN(1,e))  x(IEN(2,e))  x(IEN(3,e))  x(IEN(4,e))  x(IEN(1,e))]; 
@@ -40,7 +40,7 @@ title('Temperature distribution'); xlabel('X'); ylabel('Y');zlabel('Z'); colorba
 end 
   
 %compute flux vector at Gauss points 
-if strcmpi(compute_flux,'yes')==1;   
+if strcmpi(compute_flux,'yes')==0;   
     plot_qv=[];
     fprintf(1,'\n                     Heat Flux at Gauss Points \n') 
     fprintf(1,'----------------------------------------------------------------------------- \n') 

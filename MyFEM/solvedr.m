@@ -1,5 +1,5 @@
 % partition and solve the system of equations 
-function [d] = solvedr(K,f,d) 
+function [d] = solvedr(K,f) 
 % include_flags; 
   
 % % partition the matrix K, vectors f and d 
@@ -21,6 +21,6 @@ d = K\f;
 % f_E = K_E*d_E+K_EF*d_F; 
   
 % write to the workspace 
-solution_vector_d  = d ;
+% solution_vector_d  = d ;
 % reactions_vector   = f_E ;
 end

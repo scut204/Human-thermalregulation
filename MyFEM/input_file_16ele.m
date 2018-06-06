@@ -20,17 +20,17 @@ skin_A=compute_skin_area(femtet);
 visc = 3.5e-3;
 kb   = 18.7/3600;
 r_max   = 0.9;                      % 血管最大半径
-r0 = r_max / femtet.num_cirp * 8;
+r0 = r_max ;
 r0_skin = 0.0430;                % 皮肤血管半径
-R0_control = [r0_skin r0_skin*2 r0_skin/2];
+R0_control = [r0_skin r0_skin*2 r0_skin/2];% 主动控制系统参数
 r1 = r0/2;
 r1_skin = r0_skin/2;
 R1_control = R0_control/2;
 densb= 1.06;
 speHtb = 4.0;
-hb   = 4.36 * kb /(2*r0);
+hb   = 4.36 * kb /(2*r0) *1e-4;
 wb_basal = [0.07 0.0003 0.03 0];
-RH = 0.5  % the relative humidity is 50%
+RH = 0.5;  % the relative humidity is 50%
 
 CO = 6196/3600  ; % 第一项是心脏的位置 第二项是CO
 m_rsw = 0;
@@ -75,6 +75,14 @@ plot_mesh      = 'yes';
 plot_nod       = 'yes'; 
 plot_temp      = 'yes'; 
 plot_flux      = 'yes'; 
+
+% what to compute
+compt_bld_p = 0;
+compt_bld_t = 0;
+compt_metb  = 1;
+compt_airt  = 1;
+swt_ctrl_sys= 1;
+
 % natural B.C  - defined on edges positioned on the natural boundary 
 Tm = 0;
 [n_bc,nbe]=set_nbc(femtet);
@@ -117,12 +125,9 @@ end
     h_R = 4.2e-4;
     h_c=  3.61e-4;
     h = h_c+h_R ;
-    Tm = 0;
+
     m_bc = [femtet.f(femtet.e1(:,3),:)';
-            (Tm) * ones(4,size(femtet.e1,1))
-            h * ones(1,size(femtet.e1,1))];
-%     m_bc = [m_bc [femtet.f(femtet.e3(:,4),:)';Tm * ones(4,size(femtet.e3,1)); h(2) * ones(1,size(femtet.e1,1))]];
-    
+            h * ones(1,size(femtet.e1,1))];    
     mbe=size(m_bc,2);
  end
  

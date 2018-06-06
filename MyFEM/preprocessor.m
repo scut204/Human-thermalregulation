@@ -1,4 +1,4 @@
-function  [K,f,d,Tb,Ta,Trp] = preprocessor; 
+function  [K,f,Tb,Ta,Trp] = preprocessor; 
  
   
 % read input file  

@@ -18,111 +18,127 @@ end
 
 
 function [K,f]=src_blood_1Dmbc(K,f,Tb,Ta,Trp)
-
-    makebias_bld_n_res;
-    [w,gp] = gauss(2);
+      if(Trp.compt_bld_t == 0)
+          K=K;
+          f=f;
+          return;
+      end
 	%  heat3d + Tb
-for e = (nel/4+1):nel*3/4
+	pv = BloodTissue.create_blood_rad_set(Trp.r0_skin,Trp.r0);
+    pa = BloodTissue.create_blood_rad_set(Trp.r1_skin,Trp.r1);
+    for e = Trp.nel*3/4+1: Trp.nel
+       type = ElementType.get_tissue_type(e,Trp.nel);
+	  [par_loc] = BloodTissue.create_local_param_set(e,type,Trp,pv);
+	  [K,f]=BloodTissue.compute_stiffness(K,f,Tb,Trp,par_loc);
+	  
+	  [par_loc] = BloodTissue.create_local_param_set(e,type,Trp,pa);
+	  [K,f]=BloodTissue.compute_stiffness(K,f,Ta,Trp,par_loc);
+    end
     
-
-    r_bl = r0_skin:(r0-r0_skin)/3:r0;
-    r_bl_con =(((r_bl(2:end).^2)+(r_bl(1:end-1).^2)+r_bl(2:end).*r_bl(1:end-1))...
-               ./(3*(r_bl(1:end-1)).^3.*(r_bl(2:end)).^3))...
-               .^-0.25;    
-    if(e<=nel/4)
-        stg=1;
-    elseif(e<=nel*2/4)
-        stg=2;
-    elseif(e<=nel*3/4)
-        stg=3;
-    end
-    ro=r_bl(stg);
-    rin=r_bl(stg+1);
-    r_mid = r_bl_con(stg);
-    
-    if(e<=nel*3/4)
-    je   = IEN(:,e);            % get the global node number.
-    C    = [x(je) y(je) z(je)];  
-    eg   = [1 2 3 4 1 2 3 4 5 6 7 8;
-            2 3 4 1 5 6 7 8 6 7 8 5]; % 12条边的上下端
-    r_1d = [r_mid rin r_mid ro ro rin rin ro r_mid rin r_mid ro];
-    else
-        el3=e-nel*3/4;
-        je   = IEN3(:,el3);            % get the global node number.
-        C    = [x(je) y(je) z(je)];  
-        eg   = [1 2 3 1 2 3 4 5 6 ;
-                2 3 1 4 5 6 5 6 4 ]; % 边的上下端
-        r_1d = [ro r_mid r_mid ro ro rin ro r_mid r_mid];
-    end
-     for i = 1:size(eg,2)        
-        st = je(eg(1,i));
-        ed = je(eg(2,i));
-        delta_z = norm(C(eg(1,i),:)-C(eg(2,i),:))/2;
-        for j = 1:2
-             psi = gp(j);
-             N     = 0.5*[1-psi  1+psi];  
-             
-             hb_loc = 4.36 * kb /(2*r_1d(i));
-             ke = w(j)* 2*pi*r_1d(i)*hb_loc*(delta_z)*(N'*N);
-             fe = w(j)* 2*pi*r_1d(i)*hb_loc*(delta_z)*(N'*N)*Tb([st ed]);
-             K([st ed],[st ed])=K([st ed],[st ed])+ke;
-             f([st ed]) =   f([st ed])+ fe;
-        end
-    end
 end
-
-for e = (nel/4+1):nel*3/4
     
-
-    r_bl = r1_skin:(r1-r1_skin)/3:r0;
-    r_bl_con =(((r_bl(2:end).^2)+(r_bl(1:end-1).^2)+r_bl(2:end).*r_bl(1:end-1))...
-               ./(3*(r_bl(1:end-1)).^3.*(r_bl(2:end)).^3))...
-               .^-0.25;    
-    if(e<=nel/4)
-        stg=1;
-    elseif(e<=nel*2/4)
-        stg=2;
-    elseif(e<=nel*3/4)
-        stg=3;
-    end
-    ro=r_bl(stg);
-    rin=r_bl(stg+1);
-    r_mid = r_bl_con(stg);
-    
-    if(e<=nel*3/4)
-    je   = IEN(:,e);            % get the global node number.
-    C    = [x(je) y(je) z(je)];  
-    eg   = [1 2 3 4 1 2 3 4 5 6 7 8;
-            2 3 4 1 5 6 7 8 6 7 8 5]; % 12条边的上下端
-    r_1d = [r_mid rin r_mid ro ro rin rin ro r_mid rin r_mid ro];
-    else
-        el3=e-nel*3/4;
-        je   = IEN3(:,el3);            % get the global node number.
-        C    = [x(je) y(je) z(je)];  
-        eg   = [1 2 3 1 2 3 4 5 6 ;
-                2 3 1 4 5 6 5 6 4 ]; % 边的上下端
-        r_1d = [ro r_mid r_mid ro ro rin ro r_mid r_mid];
-    end
-     for i = 1:size(eg,2)        
-        st = je(eg(1,i));
-        ed = je(eg(2,i));
-        delta_z = norm(C(eg(1,i),:)-C(eg(2,i),:))/2;
-        for j = 1:2
-             psi = gp(j);
-             N     = 0.5*[1-psi  1+psi];  
-             
-             hb_loc = 4.36 * kb /(2*r_1d(i));
-             ke = w(j)* 2*pi*r_1d(i)*hb_loc*(delta_z)*(N'*N);
-             fe = w(j)* 2*pi*r_1d(i)*hb_loc*(delta_z)*(N'*N)*Ta([st ed]);
-             K([st ed],[st ed])=K([st ed],[st ed])+ke;
-             f([st ed]) =   f([st ed])+ fe;
-        end
-    end
-end
-
-
-
-end
+% end
+% for e = (nel/4+1):nel*3/4
+%     
+% 
+%     r_bl = r0_skin:(r0-r0_skin)/3:r0;
+%     r_bl_con =(((r_bl(2:end).^2)+(r_bl(1:end-1).^2)+r_bl(2:end).*r_bl(1:end-1))...
+%                ./(3*(r_bl(1:end-1)).^3.*(r_bl(2:end)).^3))...
+%                .^-0.25;    
+%     if(e<=nel/4)
+%         stg=1;
+%     elseif(e<=nel*2/4)
+%         stg=2;
+%     elseif(e<=nel*3/4)
+%         stg=3;
+%     end
+%     ro=r_bl(stg);
+%     rin=r_bl(stg+1);
+%     r_mid = r_bl_con(stg);
+%     
+%     if(e<=nel*3/4)
+%     je   = IEN(:,e);            % get the global node number.
+%     C    = [x(je) y(je) z(je)];  
+%     eg   = [1 2 3 4 1 2 3 4 5 6 7 8;
+%             2 3 4 1 5 6 7 8 6 7 8 5]; % 12条边的上下端
+%     r_1d = [r_mid rin r_mid ro ro rin rin ro r_mid rin r_mid ro];
+%     else
+%         el3=e-nel*3/4;
+%         je   = IEN3(:,el3);            % get the global node number.
+%         C    = [x(je) y(je) z(je)];  
+%         eg   = [1 2 3 1 2 3 4 5 6 ;
+%                 2 3 1 4 5 6 5 6 4 ]; % 边的上下端
+%         r_1d = [ro r_mid r_mid ro ro rin ro r_mid r_mid];
+%     end
+%      for i = 1:size(eg,2)        
+%         st = je(eg(1,i));
+%         ed = je(eg(2,i));
+%         delta_z = norm(C(eg(1,i),:)-C(eg(2,i),:))/2;
+%         for j = 1:2
+%              psi = gp(j);
+%              N     = 0.5*[1-psi  1+psi];  
+%              
+%              hb_loc = 4.36 * kb /(2*r_1d(i));
+%              ke = w(j)* 2*pi*r_1d(i)*hb_loc*(delta_z)*(N'*N);
+%              fe = w(j)* 2*pi*r_1d(i)*hb_loc*(delta_z)*(N'*N)*Tb([st ed]);
+%              K([st ed],[st ed])=K([st ed],[st ed])+ke;
+%              f([st ed]) =   f([st ed])+ fe;
+%         end
+%     end
+% end
+% 
+% for e = (nel/4+1):nel*3/4
+%     
+% 
+%     r_bl = r1_skin:(r1-r1_skin)/3:r0;
+%     r_bl_con =(((r_bl(2:end).^2)+(r_bl(1:end-1).^2)+r_bl(2:end).*r_bl(1:end-1))...
+%                ./(3*(r_bl(1:end-1)).^3.*(r_bl(2:end)).^3))...
+%                .^-0.25;    
+%     if(e<=nel/4)
+%         stg=1;
+%     elseif(e<=nel*2/4)
+%         stg=2;
+%     elseif(e<=nel*3/4)
+%         stg=3;
+%     end
+%     ro=r_bl(stg);
+%     rin=r_bl(stg+1);
+%     r_mid = r_bl_con(stg);
+%     
+%     if(e<=nel*3/4)
+%     je   = IEN(:,e);            % get the global node number.
+%     C    = [x(je) y(je) z(je)];  
+%     eg   = [1 2 3 4 1 2 3 4 5 6 7 8;
+%             2 3 4 1 5 6 7 8 6 7 8 5]; % 12条边的上下端
+%     r_1d = [r_mid rin r_mid ro ro rin rin ro r_mid rin r_mid ro];
+%     else
+%         el3=e-nel*3/4;
+%         je   = IEN3(:,el3);            % get the global node number.
+%         C    = [x(je) y(je) z(je)];  
+%         eg   = [1 2 3 1 2 3 4 5 6 ;
+%                 2 3 1 4 5 6 5 6 4 ]; % 边的上下端
+%         r_1d = [ro r_mid r_mid ro ro rin ro r_mid r_mid];
+%     end
+%      for i = 1:size(eg,2)        
+%         st = je(eg(1,i));
+%         ed = je(eg(2,i));
+%         delta_z = norm(C(eg(1,i),:)-C(eg(2,i),:))/2;
+%         for j = 1:2
+%              psi = gp(j);
+%              N     = 0.5*[1-psi  1+psi];  
+%              
+%              hb_loc = 4.36 * kb /(2*r_1d(i));
+%              ke = w(j)* 2*pi*r_1d(i)*hb_loc*(delta_z)*(N'*N);
+%              fe = w(j)* 2*pi*r_1d(i)*hb_loc*(delta_z)*(N'*N)*Ta([st ed]);
+%              K([st ed],[st ed])=K([st ed],[st ed])+ke;
+%              f([st ed]) =   f([st ed])+ fe;
+%         end
+%     end
+% end
+% 
+% 
+% 
+% end
 
 
 
@@ -136,8 +152,7 @@ function [K,f]=src_mbc(K,f,Trp)
     % m_bc + heat3d
 for i=1:mbe
         
-        h     = m_bc(9,i);
-%         Tm    = m_bc(5,i);
+        h     = m_bc(5,i);
         
         fq        = [0 0 0 0]';                % initialize the nodal source vector  
         kq        = zeros(4,4);
@@ -182,7 +197,6 @@ end
 function fq=gen_fq(src_P,h,Tm)
             fq=[0 0 0]';
             [w,gp] = gauss_tri(2);
-             
             gp_nodes=gp;
        for i=1:length(w)         
             psi   = gp_nodes(i,1);
@@ -192,6 +206,5 @@ function fq=gen_fq(src_P,h,Tm)
 %             J = J *0.5;
 %             Tq   = N * Tm;               % interpolate flux using shape functions in 16.1 it's 20
             fq     =fq + w(i) *N' *Tm*h*J;      % nodal flux   
-            %                 1        20  length/2(GQ)
        end
 end

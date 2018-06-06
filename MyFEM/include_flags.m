@@ -66,7 +66,13 @@ Trp.dtime = dtime;
 Trp.skin_A=skin_A;
 Trp.R0_control=R0_control;
 
-% regulation of all para
+% regulation of computation process
+
+Trp.compt_bld_p = compt_bld_p;
+Trp.compt_bld_t = compt_bld_t;
+Trp.compt_metb  = compt_metb;
+Trp.compt_airt  = compt_airt;
+Trp.swt_ctrl_sys= swt_ctrl_sys;
 
 
 

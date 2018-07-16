@@ -24,9 +24,9 @@ function [K,f]=src_blood_1Dmbc(K,f,Tb,Ta,Trp)
           return;
       end
 	%  heat3d + Tb
-	pv = BloodTissue.create_blood_rad_set(Trp.r0_skin,Trp.r0);
-    pa = BloodTissue.create_blood_rad_set(Trp.r1_skin,Trp.r1);
-    for e = Trp.nel*3/4+1: Trp.nel
+	pv = BloodTissue.create_blood_rad_set(Trp.r0_skin,Trp.r0,Trp.prsb);
+    pa = BloodTissue.create_blood_rad_set(Trp.r1_skin,Trp.r1,Trp.prsa);
+    for e = Trp.nel*Trp.bldepth(1)/4+1: Trp.nel*Trp.bldepth(2)/4
        type = ElementType.get_tissue_type(e,Trp.nel);
 	  [par_loc] = BloodTissue.create_local_param_set(e,type,Trp,pv);
 	  [K,f]=BloodTissue.compute_stiffness(K,f,Tb,Trp,par_loc);
@@ -145,37 +145,38 @@ end
 
 
 function [K,f]=src_mbc(K,f,Trp)
-    m_bc = Trp.mbc;
-    Tm   = Trp.Tm;
-    makebias_h3elem;
-    mbe = size(m_bc,2);
-    % m_bc + heat3d
-for i=1:mbe
-        
-        h     = m_bc(5,i);
-        
-        fq        = [0 0 0 0]';                % initialize the nodal source vector  
-        kq        = zeros(4,4);
-        nodes     = m_bc(1:4,i);
-        px = [x(nodes) y(nodes) z(nodes)];
-        tri       = [1 2 4;
-				     2 3 4];
-    for j=1:2                %两个三角形
-	    tri1=tri(j,:);
-        [p1,p2,p3]=deal(px(tri1(1),:),px(tri1(2),:),px(tri1(3),:));
-        nv1=cross(p2-p1,p3-p2);   
-        m1 = vrrotvec2mat(vrrotvec(nv1,[0 0 1])); %m 是一个旋转矩阵 左乘向量从参数1到参数2
-        src_P1=[m1*[p1;p2;p3]']';
-        kq1 = gen_kq(src_P1(:,1:2),h);
-        fq1 = gen_fq(src_P1(:,1:2),h,Tm);
-        fq(tri1) = fq(tri1)+fq1;
-        kq(tri1,tri1) = kq(tri1,tri1) + kq1;
-    end
-        f(nodes) = f(nodes) + fq;
-        K(nodes,nodes) = K(nodes,nodes) + kq;
-end
+    if Trp.compt_skin_env == 1;
+        m_bc = Trp.mbc;
+        Tm   = Trp.Tm;
+        makebias_h3elem;
+        mbe = size(m_bc,2);
+        % m_bc + heat3d
+        for i=1:mbe
 
- 
+                h     = m_bc(5,i);
+
+                fq        = [0 0 0 0]';                % initialize the nodal source vector  
+                kq        = zeros(4,4);
+                nodes     = m_bc(1:4,i);
+                px = [x(nodes) y(nodes) z(nodes)];
+                tri       = [1 2 4;
+                             2 3 4];
+            for j=1:2                %两个三角形
+                tri1=tri(j,:);
+                [p1,p2,p3]=deal(px(tri1(1),:),px(tri1(2),:),px(tri1(3),:));
+                nv1=cross(p2-p1,p3-p2);   
+                m1 = vrrotvec2mat(vrrotvec(nv1,[0 0 1])); %m 是一个旋转矩阵 左乘向量从参数1到参数2
+                src_P1=[m1*[p1;p2;p3]']';
+                kq1 = gen_kq(src_P1(:,1:2),h);
+                fq1 = gen_fq(src_P1(:,1:2),h,Tm);
+                fq(tri1) = fq(tri1)+fq1;
+                kq(tri1,tri1) = kq(tri1,tri1) + kq1;
+            end
+                f(nodes) = f(nodes) + fq;
+                K(nodes,nodes) = K(nodes,nodes) + kq;
+        end
+
+    end
 end
     
 % small function for tetrahedron

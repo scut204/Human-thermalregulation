@@ -3,17 +3,29 @@
 
 
 %%%%%%%%%%%%%%%%% only for test
+% rad_smp = femtet.num_cirp;
+% heg = femtet.floors;
 % femtet.v=[];
 % bott=2;
-% r = 10:((bott-10)/16):bott;
-% drl = 10 * ones(16,1);
-% rad = 2*pi/30*(1:30);
-% for fl=1:16
+% r = 10:((bott-10)/heg):bott;
+% drl = 10 * ones(heg,1);
+% rad = 2*pi/rad_smp*(1:rad_smp);
+% for fl=1:heg
 %     for i=1:4
-%         femtet.v = [femtet.v;[drl(fl)/i*cos(rad)' fl*ones(30,1) drl(fl)/i*sin(rad)']];
+%         femtet.v = [femtet.v;[drl(fl)/i*cos(rad)' fl*ones(rad_smp,1) drl(fl)/i*sin(rad)']];
 %     end
+%     femtet.v = [femtet.v;[0 fl 0]];
 % end
-
+    skin_i = femtet.f([femtet.e1(:,3)],:);
+    skin_i = unique(skin_i(:));
+        fat_i = femtet.f([femtet.e2(:,3)],:);
+    fat_i = unique(fat_i(:));
+        mus_i = femtet.f([femtet.e3(:,3)],:);
+    mus_i = unique(mus_i(:));
+        cor_i = femtet.f([femtet.e4(:,3)],:);
+        cor_i = unique(cor_i(:));
+    cor_cor_i = femtet.f3([femtet.e4(:,1)],3);
+    cor_cor_i = unique(cor_cor_i);
 
 x=femtet.v(:,1);
 y=femtet.v(:,2);
@@ -25,7 +37,28 @@ IEN=[femtet.f([femtet.e1(:,1) femtet.e2(:,1) femtet.e3(:,1)],:)';
 	 femtet.f([femtet.e1(:,2) femtet.e2(:,2) femtet.e3(:,2)],:)' ];
 IEN3 = [femtet.f3(femtet.e4(:,1),:)';
         femtet.f3(femtet.e4(:,2),:)'];
+    
+ILN_11 =unique(sort([reshape(femtet.f(femtet.e2(:,3),:)',1,[]);
+         reshape(circshift(femtet.f(femtet.e2(:,3),:)',-1,1),1,[])  ]',2),'rows');   % 将f矩阵的点向左循环移位来指示终点
+ILN_12 =unique(sort([reshape(femtet.f(femtet.e2(:,3),:)',1,[]);
+                     reshape(femtet.f(femtet.e2(:,4),:)',1,[])  ]',2),'rows');
+ILN_22 =unique(sort([reshape(femtet.f(femtet.e3(:,3),:)',1,[]);
+         reshape(circshift(femtet.f(femtet.e3(:,3),:)',-1,1),1,[])  ]',2),'rows');   % 将f矩阵的点向左循环移位来指示终点
+ILN_23 =unique(sort([reshape(femtet.f(femtet.e3(:,3),:)',1,[]);
+                     reshape(femtet.f(femtet.e3(:,4),:)',1,[])  ]',2),'rows');
+ILN_33 =unique(sort([reshape(femtet.f(femtet.e4(:,3),:)',1,[]);
+            reshape(circshift(femtet.f(femtet.e4(:,3),:)',-1,1),1,[])  ]',2),'rows');   % 将f矩阵的点向左循环移位来指示终点
+ILN_34 =unique(sort([reshape(femtet.f(femtet.e4(:,4),[1 4])',1,[]);
+            reshape(femtet.f(femtet.e4(:,4),[2 3])',1,[])  ]',2),'rows');
+ILN_44 = unique(sort([femtet.f(femtet.e4(:,4),3) femtet.f(femtet.e4(:,4),2)],2),'rows');  
+     
+     
+% ILN_3 = unique(sort([ILN_33 ILN_34]',2),'rows')';  
+% ILN_2 = [ILN_22;ILN_23]';
+% ILN_1 = [ILN_11;ILN_12 ]';
 
+                 
+ 
 % plot mesh and natural boundary  
 % plotmesh; 
 plotmesh=false;

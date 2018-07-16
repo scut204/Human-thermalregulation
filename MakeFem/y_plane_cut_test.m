@@ -21,6 +21,9 @@ end
             if(lamda<1 && lamda >0)
                 np=np+1;
                 points(:,np,num)=lamda*(v(:,j+1)-v(:,j))+v(:,j);
+%                 if(num==27)
+%                     1;     %一个尴尬的巧合，y在分界的时候和顶点对应上了。
+%                 end
             end
             
         end

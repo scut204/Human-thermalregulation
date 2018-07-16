@@ -28,6 +28,14 @@ Trp.nen = nen;
 Trp.nel = nel;
 Trp.IEN = IEN;
 Trp.IEN3 = IEN3;
+Trp.ILN_11 = ILN_11;
+Trp.ILN_12 = ILN_12;
+Trp.ILN_22 = ILN_22;
+Trp.ILN_23 = ILN_23;
+Trp.ILN_33 = ILN_33;
+Trp.ILN_34 = ILN_34;
+Trp.ILN_44 = ILN_44;
+
 Trp.x = x;
 Trp.y = y;
 Trp.z = z;
@@ -48,6 +56,8 @@ Trp.kb     = kb     ;
 Trp.densb=densb;
 Trp.speHtb=speHtb;
 Trp.wb_basal=wb_basal;
+Trp.bldepth = bldepth;
+Trp.hb_offset = hb_offset;
 % src_mix_boundaryC
 Trp.mbc=m_bc;
 
@@ -65,7 +75,7 @@ Trp.RH =RH;
 Trp.dtime = dtime;
 Trp.skin_A=skin_A;
 Trp.R0_control=R0_control;
-
+Trp.sk_bloodflow = sk_bloodflow;
 % regulation of computation process
 
 Trp.compt_bld_p = compt_bld_p;
@@ -73,8 +83,12 @@ Trp.compt_bld_t = compt_bld_t;
 Trp.compt_metb  = compt_metb;
 Trp.compt_airt  = compt_airt;
 Trp.swt_ctrl_sys= swt_ctrl_sys;
+Trp.compt_skin_env = compt_skin_env;
 
-
-
+Trp.skin_i = skin_i;
+Trp.cor_i = cor_i;
+Trp.fat_i = fat_i;
+Trp.mus_i = mus_i;
+Trp.cor_cor_i = cor_cor_i;
 
 

@@ -45,7 +45,7 @@ function bodypart_feminfo=femread_bodypart_v2(bodypart)
     ele3=[];       %第三层元素
     ele4=[];       %最内层元素  格式与前三层不同
     phi=2*pi/n_sp   :    2*pi/n_sp    :    2*pi;  % 初始化n_sp个角度的角度组
-    rad_rate = .58;    % 圆柱外层的厚度
+    rad_rate = .59;    % 圆柱外层的厚度
     skin_rate = .95;  % 除去皮肤层的厚度
     fat_rate = rad_rate;
     muscle_rate =.19;
@@ -101,9 +101,9 @@ function bodypart_feminfo=femread_bodypart_v2(bodypart)
             fc1=fc1+n_sp;
             fc2=fc2+n_sp;
         end
-        f4sdt=[f4sdt [fc1;fc1-num_pfv;fc2-num_pfv;fc2]];
-		f4frt=[f4frt [fc1;fc1+n_sp;fc1+n_sp-num_pfv;fc1-num_pfv]];  % 三角柱的切向面
-		f3bt = [fc1;fc2;repmat(fc1(1)+n_sp,1,n_sp)];
+        f4sdt=[f4sdt [fc1;fc1-num_pfv;fc2-num_pfv;fc2]];% 三角柱的径向面
+		f4frt=[f4frt [fc1;repmat(fc1(1)+n_sp,1,n_sp);repmat(fc1(1)+n_sp,1,n_sp)-num_pfv;fc1-num_pfv]];  % 三角柱的切向面
+		f3bt = [fc1;fc2;repmat(fc1(1)+n_sp,1,n_sp)];% 三角柱的底/顶面 这里的repmat(fc1(1)+n_sp,1,n_sp) 是中心点
 	    faces=[faces f4sdt f4frt f4bt];    % 
 		faces3=[faces3 f3bt];
 		% 这里只是用来记录
